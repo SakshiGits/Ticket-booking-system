@@ -5,8 +5,19 @@ location/type filters, a visual seat map with live availability, TTL-based seat 
 automatic release, race-safe concurrency on booking, a FIFO waitlist with time-limited
 auto-offers on cancellation, and QR-coded email confirmations.
 
+**Live app**: **[ticket-booking-web-xi.vercel.app](https://ticket-booking-web-xi.vercel.app)**
+**Live API**: **[api-production-260b.up.railway.app](https://api-production-260b.up.railway.app)**
+**Source**: **[github.com/SakshiGits/Ticket-booking-system](https://github.com/SakshiGits/Ticket-booking-system)**
+
+Seeded logins (password `Password123!` for all): `customer@ticketbooking.dev` ·
+`organiser@ticketbooking.dev` · `admin@ticketbooking.dev`
+
+## Demo
+
+
 ## Table of contents
 
+- [Demo](#demo)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
