@@ -23,7 +23,15 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default("Ticket Booking <no-reply@ticketbooking.dev>"),
 });
 
-const parsed = envSchema.safeParse(process.env);
+// Some hosting platforms (Railway included) inject an empty string for a variable that was
+// never set, rather than omitting it entirely — which defeats Zod's `.default(...)`, since that
+// only applies to `undefined`, not `""`. Normalize empty strings to undefined first so defaults
+// still kick in regardless of how the platform represents "unset".
+const rawEnv = Object.fromEntries(
+  Object.entries(process.env).map(([key, value]) => [key, value === "" ? undefined : value])
+);
+
+const parsed = envSchema.safeParse(rawEnv);
 
 if (!parsed.success) {
   console.error("Invalid environment configuration:", parsed.error.flatten().fieldErrors);
