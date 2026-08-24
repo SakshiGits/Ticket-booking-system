@@ -13,7 +13,7 @@ Seeded logins (password `Password123!` for all): `customer@ticketbooking.dev` ·
 `organiser@ticketbooking.dev` · `admin@ticketbooking.dev`
 
 ## Demo
-
+https://github.com/user-attachments/assets/62b133cf-ca4f-4482-a611-4cc928b38ec0
 
 ## Table of contents
 
