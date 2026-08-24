@@ -190,7 +190,7 @@ during development): **[docs/system-design.md](docs/system-design.md)**.
 | [docs/system-design.md](docs/system-design.md) | Seat hold & TTL mechanism, concurrency prevention, waitlist auto-assignment, time-limited offer handling |
 | [docs/requirements-compliance.md](docs/requirements-compliance.md) | Each technical requirement mapped to how it's implemented, verified against the running app |
 | [docs/tech-stack.md](docs/tech-stack.md) | Full technology choices and dependency list, with rationale |
-| [docs/architecture-diagram-prompt.md](docs/architecture-diagram-prompt.md) | Ready-to-paste prompt for generating the system architecture diagram in Eraser DiagramGPT |
+| [docs/architechturediagram.png](docs/architechturediagram.png) | System architecture diagram (Client / Application / Data / External layers) |
 
 ## Deployment
 

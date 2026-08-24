@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "worker": "tsx watch src/jobs/worker.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node dist/start.js",
     "start:worker": "node dist/jobs/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

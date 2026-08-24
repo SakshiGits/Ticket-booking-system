@@ -4,9 +4,9 @@
 
 A TypeScript monorepo (npm workspaces) split into two deployables — `apps/api` (REST API +
 background worker, run as separate processes from one codebase) and `apps/web` (SPA) — backed by
-managed PostgreSQL and Redis. See [architecture-diagram-prompt.md](architecture-diagram-prompt.md)
-for a full diagram description and [system-design.md](system-design.md) for the mechanism-level
-design rationale.
+managed PostgreSQL and Redis. See [architechturediagram.png](architechturediagram.png) for the
+full architecture diagram and [system-design.md](system-design.md) for the mechanism-level design
+rationale.
 
 ---
 
