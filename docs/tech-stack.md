@@ -90,7 +90,7 @@ untyped dependency above.
 | Monorepo management | npm workspaces (`apps/*`) | No extra tooling (Turborepo/Nx) needed at this scale |
 | Local dev services | Docker Compose | Postgres 16 + Redis 7 containers for local development, mirroring production topology |
 | Combined dev script | `concurrently` | Runs API + worker together in one terminal; the frontend runs separately due to a Windows/esbuild resource-race when all three start at once (documented in the README) |
-| Target hosting | Render/Railway (API + worker + managed Postgres + managed Redis), Vercel (frontend) | Free-tier friendly; API and worker deploy as two services from the same image so the worker can scale/restart independently of the API |
+| Hosting (live) | Railway (API + worker + managed Postgres + managed Redis), Vercel (frontend) | Free-tier friendly; API and worker deploy as two services from the same build so the worker can scale/restart independently of the API |
 
 ---
 

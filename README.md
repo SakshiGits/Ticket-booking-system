@@ -194,13 +194,26 @@ during development): **[docs/system-design.md](docs/system-design.md)**.
 
 ## Deployment
 
-- **API + worker + Postgres + Redis**: Render or Railway. Deploy `apps/api` as a web service
-  (`npm run build && npm run start`) and a second background worker service (`npm run
-  start:worker`) from the same repo/image; add managed Postgres and Redis add-ons and point
-  `DATABASE_URL`/`REDIS_URL` at them; run `npx prisma migrate deploy` as a release step.
+**Live**: **[https://ticket-booking-web-xi.vercel.app](https://ticket-booking-web-xi.vercel.app)**
+(seeded logins: `customer@ticketbooking.dev` / `organiser@ticketbooking.dev` /
+`admin@ticketbooking.dev`, password `Password123!` for all three).
+
+- **API + worker + Postgres + Redis**: Railway, one project, four services from a single
+  `railway.json` at the repo root:
+  - `api` and `worker` deploy from the same GitHub-linked build (`npm install --include=dev &&
+    npm run prisma:generate -w apps/api && npm run build -w apps/api`); which process runs is
+    chosen at start by the `PROCESS_TYPE` env var (`worker`, or unset for the API) via
+    `apps/api/src/start.ts` — one build config instead of maintaining two.
+  - Managed `Postgres` and `Redis` add-ons, referenced by the app services via Railway's
+    `${{Postgres.DATABASE_URL}}` / `${{Redis.REDIS_URL}}` variable syntax.
+  - `npx prisma migrate deploy` runs as part of the start command, ahead of the server boot.
 - **Frontend**: Vercel, building `apps/web` with `VITE_API_URL`/`VITE_SOCKET_URL` pointed at the
-  deployed API.
-- **Hosted URL**: not yet deployed — see project status for current plans.
+  Railway API's public domain. `apps/web/vercel.json` adds a catch-all rewrite to `index.html` —
+  required for a client-side-routed SPA, otherwise a direct visit or refresh on any non-root
+  route (e.g. `/login`) 404s.
+- Verified end-to-end against the live URLs (not just individually): login, browse, seat hold,
+  and the concurrency/TTL/waitlist mechanisms all confirmed working against the deployed
+  Postgres/Redis, with zero console errors and zero failed network requests.
 
 ## Known limitations
 
