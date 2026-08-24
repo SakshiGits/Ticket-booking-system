@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ORGANISER
+  ADMIN
+}
+
+enum EventType {
+  MOVIE
+  CONCERT
+}
+
+enum SeatStatus {
+  AVAILABLE
+  HELD
+  BOOKED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum WaitlistStatus {
+  WAITING
+  OFFERED
+  EXPIRED
+  BOOKED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  venues          Venue[]         @relation("VenueAdmin")
+  events          Event[]         @relation("EventOrganiser")
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
+
+  @@map("users")
+}
+
+/// Physical venue managed by an admin.
+model Venue {
+  id        String   @id @default(uuid())
+  adminId   String
+  admin     User     @relation("VenueAdmin", fields: [adminId], references: [id])
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+
+  seats VenueSeat[]
+  shows Show[]
+
+  @@map("venues")
+}
+
+/// Fixed physical seat layout for a venue (drawn once, reused by every show at that venue).
+model VenueSeat {
+  id       String @id @default(uuid())
+  venueId  String
+  venue    Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  row      String
+  number   Int
+  category String
+  posX     Int
+  posY     Int
+
+  showSeats ShowSeat[]
+
+  @@unique([venueId, row, number])
+  @@map("venue_seats")
+}
+
+/// A movie or concert listing owned by an organiser.
+model Event {
+  id              String    @id @default(uuid())
+  organiserId     String
+  organiser       User      @relation("EventOrganiser", fields: [organiserId], references: [id])
+  title           String
+  type            EventType
+  description     String?
+  posterUrl       String?
+  language        String?
+  durationMinutes Int?
+  genre           String?
+  rating          Float?
+  createdAt       DateTime  @default(now())
+
+  shows Show[]
+
+  @@map("events")
+}
+
+/// One bookable date/time instance of an Event at a Venue.
+model Show {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  date      DateTime
+  time      String
+  createdAt DateTime @default(now())
+
+  categories      ShowCategory[]
+  seats           ShowSeat[]
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
+
+  @@map("shows")
+}
+
+/// Per-category pricing for a specific show (e.g. Premium ₹500, Standard ₹250).
+model ShowCategory {
+  id     String  @id @default(uuid())
+  showId String
+  show   Show    @relation(fields: [showId], references: [id], onDelete: Cascade)
+  name   String
+  price  Decimal @db.Decimal(10, 2)
+
+  showSeats       ShowSeat[]
+  waitlistEntries WaitlistEntry[]
+
+  @@unique([showId, name])
+  @@map("show_categories")
+}
+
+/// Per-show snapshot of every seat, carrying live status. This is THE seat map.
+model ShowSeat {
+  id            String     @id @default(uuid())
+  showId        String
+  show          Show       @relation(fields: [showId], references: [id], onDelete: Cascade)
+  venueSeatId   String
+  venueSeat     VenueSeat  @relation(fields: [venueSeatId], references: [id])
+  categoryId    String
+  category      ShowCategory @relation(fields: [categoryId], references: [id])
+  status        SeatStatus @default(AVAILABLE)
+  heldBy        String?
+  holdExpiresAt DateTime?
+  bookingId     String?
+  booking       Booking?   @relation(fields: [bookingId], references: [id])
+
+  @@unique([showId, venueSeatId])
+  @@index([showId, status])
+  @@index([status, holdExpiresAt])
+  @@map("show_seats")
+}
+
+model Booking {
+  id          String        @id @default(uuid())
+  bookingRef  String        @unique @default(uuid())
+  customerId  String
+  customer    User          @relation(fields: [customerId], references: [id])
+  showId      String
+  show        Show          @relation(fields: [showId], references: [id])
+  totalAmount Decimal       @db.Decimal(10, 2)
+  status      BookingStatus @default(CONFIRMED)
+  qrUrl       String?
+  createdAt   DateTime      @default(now())
+  cancelledAt DateTime?
+
+  seats ShowSeat[]
+
+  @@index([customerId])
+  @@index([showId])
+  @@map("bookings")
+}
+
+/// FIFO waitlist per show+category. Offers are time-limited holds tied to one entry.
+model WaitlistEntry {
+  id             String         @id @default(uuid())
+  showId         String
+  show           Show           @relation(fields: [showId], references: [id])
+  categoryId     String
+  category       ShowCategory   @relation(fields: [categoryId], references: [id])
+  customerId     String
+  customer       User           @relation(fields: [customerId], references: [id])
+  status         WaitlistStatus @default(WAITING)
+  offeredSeatId  String?
+  offerToken     String?        @unique
+  offerExpiresAt DateTime?
+  createdAt      DateTime       @default(now())
+
+  @@index([showId, categoryId, status, createdAt])
+  @@map("waitlist_entries")
+}
